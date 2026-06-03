@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HasnainPay — Digital Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+/* ══════════════════════════════════
+   CSS VARIABLES
+══════════════════════════════════ */
+:root{
+  --gold:#C9A84C; --gold-l:#E8C878; --gold-d:#9A7630;
+  --navy:#0A0F1E; --navy-m:#111827; --navy-c:#161D2F; --navy-b:#1E2A42;
+  --txt:#F0EAD6; --muted:#7A8AA0; --dim:#4A5568;
+  --green:#22C55E; --gbg:rgba(34,197,94,.12);
+  --red:#EF4444;   --rbg:rgba(239,68,68,.12);
+  --r:16px; --rs:10px;
+  --shadow:0 8px 40px rgba(0,0,0,.5);
+  --fd:'Playfair Display',Georgia,serif;
+  --fb:'DM Sans',sans-serif;
+  --fm:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--navy);color:var(--txt);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ══════════════════════════════════
+   PAGE SYSTEM
+══════════════════════════════════ */
+.page{display:none;min-height:100vh}
+.page.active{display:block}
+#page-dashboard.active,#page-friend.active{display:flex;flex-direction:column}
+
+/* ══════════════════════════════════
+   BACKGROUND
+══════════════════════════════════ */
+.bg-wrap{
+  min-height:100vh;
+  background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Oxford-University-Hight-Street.jpg/1280px-Oxford-University-Hight-Street.jpg') center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;position:relative;
+}
+.bg-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,15,30,.94) 0%,rgba(20,30,60,.9) 100%);backdrop-filter:blur(2px)}
+
+/* ══════════════════════════════════
+   AUTH CARD
+══════════════════════════════════ */
+.auth-card{
+  position:relative;z-index:2;
+  background:var(--navy-c);border:1px solid var(--navy-b);
+  border-top:2px solid var(--gold);border-radius:var(--r);
+  padding:40px 32px 32px;width:100%;max-width:420px;
+  box-shadow:var(--shadow),0 0 60px rgba(201,168,76,.08);
+  animation:slideUp .45s ease both;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:20px;color:var(--gold);font-family:var(--fd);font-size:1.5rem;font-weight:700}
+.auth-logo i{font-size:1.6rem}
+.auth-title{font-family:var(--fd);font-size:1.9rem;font-weight:900;margin-bottom:5px}
+.auth-sub{color:var(--muted);font-size:.88rem;margin-bottom:24px}
+
+/* Tabs */
+.auth-tabs{display:flex;background:var(--navy);border-radius:var(--rs);padding:4px;margin-bottom:24px;gap:4px}
+.auth-tab{flex:1;padding:9px;border:none;background:transparent;color:var(--muted);font-family:var(--fb);font-size:.88rem;font-weight:600;border-radius:8px;cursor:pointer;transition:background .2s,color .2s}
+.auth-tab.active{background:linear-gradient(135deg,var(--gold-d),var(--gold));color:var(--navy)}
+
+/* Form */
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:.76rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.req{color:var(--gold)}
+.iw{position:relative;display:flex;align-items:center}
+.iw>i.ico{position:absolute;left:13px;color:var(--dim);font-size:.88rem;pointer-events:none}
+.iw input{
+  width:100%;background:var(--navy);border:1.5px solid var(--navy-b);
+  border-radius:var(--rs);padding:12px 12px 12px 38px;
+  color:var(--txt);font-family:var(--fb);font-size:.93rem;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.iw input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.15)}
+.iw input::placeholder{color:var(--dim)}
+.eye{position:absolute;right:12px;color:var(--dim);cursor:pointer;font-size:.88rem}
+.eye:hover{color:var(--gold)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:var(--rs);padding:13px 22px;font-family:var(--fb);font-size:.93rem;font-weight:700;cursor:pointer;transition:transform .15s,filter .15s,box-shadow .15s;letter-spacing:.02em}
+.btn:active{transform:scale(.98)}
+.btn-gold{background:linear-gradient(135deg,var(--gold-d),var(--gold));color:var(--navy)}
+.btn-gold:hover{filter:brightness(1.1);box-shadow:0 6px 20px rgba(201,168,76,.4);transform:translateY(-1px)}
+.btn-outline{background:transparent;border:1.5px solid var(--navy-b);color:var(--muted)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-icon{background:rgba(255,255,255,.06);border:1px solid var(--navy-b);color:var(--txt);border-radius:10px;padding:9px 14px;font-size:.83rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .2s,border-color .2s,color .2s;font-family:var(--fb);font-weight:600}
+.btn-icon:hover{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold)}
+.btn-icon.dng:hover{background:var(--rbg);border-color:var(--red);color:var(--red)}
+.w100{width:100%}
+
+.link{text-align:center;color:var(--gold);font-size:.87rem;cursor:pointer;margin-top:14px;display:block;transition:opacity .2s}
+.link:hover{opacity:.7}
+
+/* Messages */
+.msg{border-radius:var(--rs);font-size:.84rem;padding:10px 13px;margin-bottom:12px;animation:fadeIn .2s ease}
+.msg.err{background:var(--rbg);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.msg.ok{background:var(--gbg);border:1px solid rgba(34,197,94,.3);color:var(--green)}
+.msg.info{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold-l)}
+.hidden{display:none!important}
+
+/* ══════════════════════════════════
+   DASHBOARD
+══════════════════════════════════ */
+.dash-hero{
+  position:relative;flex-shrink:0;
+  background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Oxford-University-Hight-Street.jpg/1280px-Oxford-University-Hight-Street.jpg') center/cover no-repeat;
+  padding-bottom:36px;
+}
+.dash-hero-ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,15,30,.93) 0%,rgba(10,15,30,.87) 60%,rgba(10,15,30,.99) 100%)}
+
+.dash-hdr{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:18px 18px}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--fd);font-size:1.3rem;font-weight:700;color:var(--gold)}
+.brand i{font-size:1.4rem}
+.hdr-r{display:flex;gap:9px}
+
+.bal-card{position:relative;z-index:2;text-align:center;padding:24px 20px 18px}
+.bal-lbl{font-size:.76rem;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);margin-bottom:8px;font-weight:600}
+.bal-amt{font-family:var(--fd);font-size:clamp(2.2rem,7vw,3.3rem);font-weight:900;letter-spacing:-.02em;text-shadow:0 2px 20px rgba(201,168,76,.3)}
+.bal-sub{font-size:.8rem;color:var(--muted);margin-top:6px}
+
+.act-row{position:relative;z-index:2;display:flex;gap:12px;padding:8px 18px 0;justify-content:center}
+.act-btn{flex:1;max-width:175px;background:rgba(201,168,76,.1);border:1.5px solid rgba(201,168,76,.28);border-radius:var(--r);padding:15px 8px;color:var(--gold-l);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;font-family:var(--fb);font-size:.86rem;font-weight:600;transition:background .2s,transform .15s,box-shadow .2s}
+.act-btn i{font-size:1.3rem}
+.act-btn:hover{background:rgba(201,168,76,.2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,168,76,.2)}
+.act-btn.dng{background:var(--rbg);border-color:rgba(239,68,68,.32);color:#FC8181}
+.act-btn.dng:hover{background:rgba(239,68,68,.22)}
+
+.friends-sec{flex:1;padding:26px 14px 14px;overflow-y:auto}
+.sec-ttl{font-family:var(--fd);font-size:1.05rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+.sec-ttl i{color:var(--gold)}
+.badge{background:var(--gold);color:var(--navy);border-radius:20px;font-size:.73rem;font-weight:700;padding:2px 9px;font-family:var(--fb)}
+
+.friends-list{display:flex;flex-direction:column;gap:9px}
+.fc{background:var(--navy-c);border:1px solid var(--navy-b);border-radius:var(--r);padding:15px 16px;display:flex;align-items:center;gap:13px;cursor:pointer;transition:border-color .2s,transform .15s,box-shadow .2s;animation:fadeIn .3s ease both}
+.fc:hover{border-color:var(--gold-d);transform:translateX(4px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold-d),var(--gold));display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:1.15rem;font-weight:700;color:var(--navy);flex-shrink:0}
+.fi{flex:1;min-width:0}
+.fn{font-weight:600;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fp{font-size:.76rem;color:var(--muted);margin-top:2px}
+.fb2{font-family:var(--fm);font-size:.88rem;font-weight:600;text-align:right;flex-shrink:0}
+.fb2.pos{color:var(--green)}.fb2.neg{color:var(--red)}.fb2.zero{color:var(--dim)}
+.arr{color:var(--dim);font-size:.78rem;margin-left:5px}
+
+.empty{text-align:center;padding:46px 20px;color:var(--dim)}
+.empty i{font-size:2.4rem;margin-bottom:12px;display:block}
+.empty p{font-size:.88rem;line-height:1.6}
+.empty strong{color:var(--gold)}
+
+/* Footer */
+.app-footer{background:var(--navy-c);border-top:1px solid var(--navy-b);padding:28px 18px;text-align:center;margin-top:18px}
+.footer-crown{font-size:1.3rem;color:var(--gold);margin-bottom:9px}
+.ft-ttl{font-size:.76rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:5px}
+.ft-name{font-family:var(--fd);font-size:1rem;font-weight:700;color:var(--gold-l);margin-bottom:5px}
+.ft-role{font-size:.8rem;color:var(--muted);margin-bottom:3px}
+.ft-inst{font-size:.76rem;color:var(--dim);margin-bottom:11px}
+.ft-email{display:inline-flex;align-items:center;gap:6px;color:var(--gold);font-size:.83rem;text-decoration:none;border:1px solid rgba(201,168,76,.3);padding:7px 15px;border-radius:30px;transition:background .2s}
+.ft-email:hover{background:rgba(201,168,76,.1)}
+
+/* ══════════════════════════════════
+   FRIEND DETAIL
+══════════════════════════════════ */
+.fr-hero{
+  position:relative;flex-shrink:0;
+  background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Oxford-University-Hight-Street.jpg/1280px-Oxford-University-Hight-Street.jpg') center/cover no-repeat;
+  padding-bottom:32px;
+}
+.fr-hero-ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,15,30,.95) 0%,rgba(10,15,30,.88) 60%,rgba(10,15,30,1) 100%)}
+.fr-hdr{position:relative;z-index:2;display:flex;align-items:center;padding:18px 14px;gap:11px}
+.back{background:rgba(255,255,255,.08);border:1px solid var(--navy-b);border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:var(--txt);cursor:pointer;flex-shrink:0;transition:background .2s,border-color .2s;font-size:.88rem}
+.back:hover{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold)}
+.fr-info{flex:1;display:flex;align-items:center;gap:11px;min-width:0}
+.fr-info h2{font-family:var(--fd);font-size:1.1rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-info p{font-size:.76rem;color:var(--muted);margin-top:2px}
+
+.bal-pill-w{position:relative;z-index:2;padding:0 14px}
+.bal-pill{background:var(--navy-c);border:1px solid var(--navy-b);border-radius:var(--r);padding:16px 20px;display:flex;align-items:center;gap:12px}
+.pill-lbl{font-size:.76rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-right:auto;font-weight:600}
+.pill-amt{font-family:var(--fm);font-size:1.45rem;font-weight:700;transition:color .3s;animation:pulse 2.5s ease-in-out infinite}
+.pill-amt.pos{color:var(--green)}.pill-amt.neg{color:var(--red)}.pill-amt.zero{color:var(--muted)}
+@keyframes pulse{0%,100%{text-shadow:none}50%{text-shadow:0 0 18px currentColor}}
+.pill-bdg{font-size:.68rem;font-weight:700;letter-spacing:.1em;padding:4px 9px;border-radius:20px;text-transform:uppercase}
+.pill-bdg.pos{background:var(--gbg);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.pill-bdg.neg{background:var(--rbg);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.pill-bdg.zero{background:rgba(255,255,255,.05);color:var(--dim);border:1px solid var(--navy-b)}
+
+.txn-sec{flex:1;padding:20px 14px 110px;overflow-y:auto}
+.txn-list{display:flex;flex-direction:column;gap:9px}
+.ti{background:var(--navy-c);border:1px solid var(--navy-b);border-radius:var(--rs);padding:13px 15px;display:flex;align-items:center;gap:11px;animation:fadeIn .3s ease both}
+.ti-ico{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.88rem;flex-shrink:0}
+.ti-ico.receive{background:var(--gbg);color:var(--green)}.ti-ico.give{background:var(--rbg);color:var(--red)}
+.ti-meta{flex:1;min-width:0}
+.ti-note{font-size:.88rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ti-date{font-size:.72rem;color:var(--muted);margin-top:2px;font-family:var(--fm)}
+.ti-amt{font-family:var(--fm);font-size:.92rem;font-weight:700;text-align:right;flex-shrink:0}
+.ti-amt.receive{color:var(--green)}.ti-amt.give{color:var(--red)}
+
+.txn-ctrl{position:fixed;bottom:0;left:0;right:0;display:flex;z-index:100;box-shadow:0 -4px 24px rgba(0,0,0,.5)}
+.txn-btn{flex:1;padding:17px 10px;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-family:var(--fb);font-size:.86rem;font-weight:700;letter-spacing:.05em;transition:filter .15s,transform .1s}
+.txn-btn i{font-size:1.15rem}
+.txn-btn:active{transform:scale(.97)}
+.txn-btn.receive{background:linear-gradient(135deg,#16A34A,var(--green));color:#fff}
+.txn-btn.receive:hover{filter:brightness(1.1)}
+.txn-btn.give{background:linear-gradient(135deg,#DC2626,var(--red));color:#fff}
+.txn-btn.give:hover{filter:brightness(1.1)}
+
+/* ══════════════════════════════════
+   MODALS
+══════════════════════════════════ */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:0;animation:fadeIn .2s ease}
+.modal-card{background:var(--navy-c);border:1px solid var(--navy-b);border-top:2px solid var(--gold);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;animation:slideUpM .28s ease both}
+@keyframes slideUpM{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.m-hdr{padding:18px 18px 0;display:flex;align-items:center;justify-content:space-between}
+.m-hdr h3{font-family:var(--fd);font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.m-hdr h3 i{color:var(--gold)}
+.m-close{background:rgba(255,255,255,.06);border:1px solid var(--navy-b);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;transition:background .2s,color .2s;font-size:.88rem}
+.m-close:hover{background:var(--rbg);color:var(--red);border-color:var(--red)}
+.m-body{padding:18px}
+.m-desc{font-size:.86rem;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.m-foot{padding:0 18px 20px}
+
+.del-list{display:flex;flex-direction:column;gap:7px;max-height:280px;overflow-y:auto}
+.del-item{background:var(--navy);border:1px solid var(--navy-b);border-radius:var(--rs);padding:11px 14px;display:flex;align-items:center;gap:11px}
+.del-item .fn{flex:1;font-size:.9rem}
+.btn-del{background:var(--rbg);border:1px solid rgba(239,68,68,.3);border-radius:8px;color:var(--red);padding:7px 11px;cursor:pointer;font-size:.78rem;font-weight:600;transition:background .2s;font-family:var(--fb)}
+.btn-del:hover{background:rgba(239,68,68,.28)}
+
+.m-hdr.receive-h{border-top-color:var(--green)}
+.m-hdr.give-h{border-top-color:var(--red)}
+
+/* ══════════════════════════════════
+   TOAST
+══════════════════════════════════ */
+.toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:var(--gbg);border:1px solid rgba(34,197,94,.4);color:var(--green);padding:11px 20px;border-radius:30px;font-size:.86rem;font-weight:600;display:flex;align-items:center;gap:7px;z-index:999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:toastIn .3s ease both}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ══════════════════════════════════
+   ANIMATIONS & SCROLLBAR
+══════════════════════════════════ */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--navy)}
+::-webkit-scrollbar-thumb{background:var(--navy-b);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:var(--gold-d)}
+
+/* ══════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════ */
+@media(max-width:400px){
+  .auth-card{padding:28px 16px 22px}
+  .bal-amt{font-size:2rem}
+  .act-row{gap:8px}
+  .act-btn{padding:13px 6px;font-size:.8rem}
+}
+@media(min-width:600px){
+  .modal-ov{align-items:center;padding:20px}
+  .modal-card{border-radius:var(--r);max-height:85vh}
+  .txn-ctrl{max-width:600px;left:50%;transform:translateX(-50%)}
+  .toast{bottom:90px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     PAGE 1: AUTH (Login + Register tabs)
+══════════════════════════════════════ -->
+<div id="page-auth" class="page active">
+  <div class="bg-wrap">
+    <div class="bg-overlay"></div>
+    <div class="auth-card">
+
+      <div class="auth-logo">
+        <i class="fa-solid fa-wallet"></i>
+        <span>HasnainPay</span>
+      </div>
+      <h2 class="auth-title">Digital Wallet</h2>
+      <p class="auth-sub">Manage your money with elegance</p>
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login"    onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab"        id="tab-register" onclick="switchTab('register')">Create Account</button>
+      </div>
+
+      <!-- ── LOGIN FORM ── -->
+      <div id="form-login">
+        <div class="fg">
+          <label>Email Address <span class="req">*</span></label>
+          <div class="iw">
+            <i class="ico fa-regular fa-envelope"></i>
+            <input type="email" id="l-email" placeholder="your@email.com" autocomplete="email"/>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Password <span class="req">*</span></label>
+          <div class="iw">
+            <i class="ico fa-solid fa-lock"></i>
+            <input type="password" id="l-pw" placeholder="••••••••" autocomplete="current-password"/>
+            <i class="eye fa-regular fa-eye" id="eye-login"></i>
+          </div>
+        </div>
+        <div id="msg-login" class="msg err hidden"></div>
+        <button class="btn btn-gold w100" onclick="doLogin()">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+        </button>
+        <span class="link" onclick="showPage('page-reset')">Forgot password?</span>
+      </div>
+
+      <!-- ── REGISTER FORM ── -->
+      <div id="form-register" class="hidden">
+        <div class="fg">
+          <label>Your Name <span class="req">*</span></label>
+          <div class="iw">
+            <i class="ico fa-solid fa-user"></i>
+            <input type="text" id="r-name" placeholder="Hasnain Rind" autocomplete="name"/>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Email Address <span class="req">*</span></label>
+          <div class="iw">
+            <i class="ico fa-regular fa-envelope"></i>
+            <input type="email" id="r-email" placeholder="your@email.com" autocomplete="email"/>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Password <span class="req">*</span></label>
+          <div class="iw">
+            <i class="ico fa-solid fa-lock"></i>
+            <input type="password" id="r-pw" placeholder="Min 4 characters" autocomplete="new-password"/>
+            <i class="eye fa-regular fa-eye" id="eye-reg"></i>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Confirm Password <span class="req">*</span></label>
+          <div class="iw">
+            <i class="ico fa-solid fa-lock"></i>
+            <input type="password" id="r-cpw" placeholder="Repeat password" autocomplete="new-password"/>
+          </div>
+        </div>
+        <div id="msg-register" class="msg err hidden"></div>
+        <button class="btn btn-gold w100" onclick="doRegister()">
+          <i class="fa-solid fa-user-plus"></i> Create Account
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE 2: RESET PASSWORD
+══════════════════════════════════════ -->
+<div id="page-reset" class="page">
+  <div class="bg-wrap">
+    <div class="bg-overlay"></div>
+    <div class="auth-card">
+      <div class="auth-logo">
+        <i class="fa-solid fa-key"></i>
+        <span>Reset Password</span>
+      </div>
+      <h2 class="auth-title">Recover Access</h2>
+      <p class="auth-sub">Enter your registered email to set a new password</p>
+
+      <div class="fg">
+        <label>Registered Email <span class="req">*</span></label>
+        <div class="iw">
+          <i class="ico fa-regular fa-envelope"></i>
+          <input type="email" id="rs-email" placeholder="your@email.com"/>
+        </div>
+      </div>
+      <div class="fg">
+        <label>New Password <span class="req">*</span></label>
+        <div class="iw">
+          <i class="ico fa-solid fa-lock"></i>
+          <input type="password" id="rs-pw" placeholder="Min 4 characters"/>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Confirm Password <span class="req">*</span></label>
+        <div class="iw">
+          <i class="ico fa-solid fa-lock"></i>
+          <input type="password" id="rs-cpw" placeholder="Repeat password"/>
+        </div>
+      </div>
+      <div id="msg-reset" class="msg err hidden"></div>
+      <button class="btn btn-gold w100" onclick="doReset()">
+        <i class="fa-solid fa-rotate"></i> Reset Password
+      </button>
+      <span class="link" onclick="showPage('page-auth')">
+        <i class="fa-solid fa-arrow-left"></i> Back to Login
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE 3: DASHBOARD
+══════════════════════════════════════ -->
+<div id="page-dashboard" class="page">
+
+  <div class="dash-hero">
+    <div class="dash-hero-ov"></div>
+    <div class="dash-hdr">
+      <div class="brand"><i class="fa-solid fa-wallet"></i><span>HasnainPay</span></div>
+      <div class="hdr-r">
+        <button class="btn-icon" onclick="saveAllData()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+        <button class="btn-icon dng" onclick="doLogout()" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </div>
+    <div class="bal-card">
+      <p class="bal-lbl">Total Wallet Balance</p>
+      <h1 class="bal-amt" id="total-bal">PKR 0.00</h1>
+      <p class="bal-sub" id="bal-sub">Across all friends</p>
+    </div>
+    <div class="act-row">
+      <button class="act-btn" onclick="openAddFriend()">
+        <i class="fa-solid fa-user-plus"></i><span>Add Friend</span>
+      </button>
+      <button class="act-btn dng" onclick="openDeleteFriend()">
+        <i class="fa-solid fa-user-minus"></i><span>Delete Friend</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="friends-sec">
+    <h3 class="sec-ttl">
+      <i class="fa-solid fa-users"></i> My Friends
+      <span class="badge" id="f-count">0</span>
+    </h3>
+    <div id="friends-list" class="friends-list">
+      <div class="empty" id="empty-friends">
+        <i class="fa-solid fa-user-group"></i>
+        <p>No friends yet.<br>Tap <strong>Add Friend</strong> to begin.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <div class="footer-crown"><i class="fa-solid fa-crown"></i></div>
+    <p class="ft-ttl">CEO of the Management of this Application</p>
+    <p class="ft-name">Sardar Mr. Muhammed Hasnain Khan Rind Baloch</p>
+    <p class="ft-role">Artificial Intelligence &amp; Claude Computing Engineer</p>
+    <p class="ft-inst">(I.T University of Governor House Karachi)</p>
+    <a class="ft-email" href="mailto:hasnainabass243@gmail.com">
+      <i class="fa-regular fa-envelope"></i> hasnainabass243@gmail.com
+    </a>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE 4: FRIEND DETAIL
+══════════════════════════════════════ -->
+<div id="page-friend" class="page">
+
+  <div class="fr-hero">
+    <div class="fr-hero-ov"></div>
+    <div class="fr-hdr">
+      <button class="back" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i></button>
+      <div class="fr-info">
+        <div class="av" id="fr-av">A</div>
+        <div>
+          <h2 id="fr-name">Friend</h2>
+          <p id="fr-phone">—</p>
+        </div>
+      </div>
+      <button class="btn-icon" onclick="saveAllData()"><i class="fa-solid fa-floppy-disk"></i></button>
+    </div>
+    <div class="bal-pill-w">
+      <div class="bal-pill" id="bal-pill">
+        <span class="pill-lbl">Total Collection</span>
+        <span class="pill-amt zero" id="pill-amt">PKR 0.00</span>
+        <span class="pill-bdg zero" id="pill-bdg">SETTLED</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="txn-sec">
+    <h3 class="sec-ttl"><i class="fa-solid fa-clock-rotate-left"></i> Transaction History</h3>
+    <div id="txn-list" class="txn-list">
+      <div class="empty" id="empty-txns">
+        <i class="fa-solid fa-receipt"></i>
+        <p>No transactions yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="txn-ctrl">
+    <button class="txn-btn receive" onclick="openTxnModal('receive')">
+      <i class="fa-solid fa-arrow-down-to-bracket"></i><span>You Receive</span>
+    </button>
+    <button class="txn-btn give" onclick="openTxnModal('give')">
+      <i class="fa-solid fa-arrow-up-from-bracket"></i><span>You Give</span>
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODALS
+══════════════════════════════════════ -->
+
+<!-- Add Friend -->
+<div id="mod-add" class="modal-ov hidden">
+  <div class="modal-card">
+    <div class="m-hdr">
+      <h3><i class="fa-solid fa-user-plus"></i> Add Friend</h3>
+      <button class="m-close" onclick="closeMod('mod-add')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="m-body">
+      <div class="fg">
+        <label>Friend's Name <span class="req">*</span></label>
+        <div class="iw"><i class="ico fa-solid fa-user"></i><input type="text" id="af-name" placeholder="Enter name"/></div>
+      </div>
+      <div class="fg">
+        <label>Phone / Details</label>
+        <div class="iw"><i class="ico fa-solid fa-phone"></i><input type="text" id="af-phone" placeholder="Optional"/></div>
+      </div>
+      <div id="af-pick-wrap">
+        <button class="btn btn-outline w100" onclick="pickContact()"><i class="fa-solid fa-address-book"></i> Pick from Contacts</button>
+      </div>
+      <div id="msg-af" class="msg err hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-gold w100" onclick="addFriend()"><i class="fa-solid fa-plus"></i> Add Friend</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Friend -->
+<div id="mod-del" class="modal-ov hidden">
+  <div class="modal-card">
+    <div class="m-hdr">
+      <h3><i class="fa-solid fa-user-minus"></i> Delete Friend</h3>
+      <button class="m-close" onclick="closeMod('mod-del')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="m-body">
+      <p class="m-desc">Select a friend to permanently remove them and all their transactions.</p>
+      <div id="del-list" class="del-list"></div>
+      <div id="msg-del" class="msg err hidden"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Transaction -->
+<div id="mod-txn" class="modal-ov hidden">
+  <div class="modal-card">
+    <div class="m-hdr" id="txn-m-hdr">
+      <h3 id="txn-m-title"><i class="fa-solid fa-arrow-down-to-bracket"></i> You Receive</h3>
+      <button class="m-close" onclick="closeMod('mod-txn')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="m-body">
+      <div class="fg">
+        <label>Amount (PKR) <span class="req">*</span></label>
+        <div class="iw"><i class="ico fa-solid fa-pakistani-rupee-sign"></i><input type="number" id="txn-amt" placeholder="0.00" min="0" step="0.01"/></div>
+      </div>
+      <div class="fg">
+        <label>Note (optional)</label>
+        <div class="iw"><i class="ico fa-solid fa-note-sticky"></i><input type="text" id="txn-note" placeholder="e.g. Loan, groceries…"/></div>
+      </div>
+      <div class="fg">
+        <label>Date &amp; Time</label>
+        <div class="iw"><i class="ico fa-regular fa-calendar"></i><input type="datetime-local" id="txn-dt"/></div>
+      </div>
+      <div id="msg-txn" class="msg err hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-gold w100" id="txn-sub-btn" onclick="submitTxn()">
+        <i class="fa-solid fa-check"></i> Confirm
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"><i class="fa-solid fa-circle-check"></i> Saved!</div>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─── Storage keys ─── */
+const K = { USERS:'hnp_users', FRIENDS:'hnp_friends', TXNS:'hnp_txns', SESSION:'hnp_session' };
+
+/* ─── App state ─── */
+let S = { user:null, friends:[], txns:{}, activeFriend:null, txnMode:'receive' };
+
+/* ─── Init ─── */
+document.addEventListener('DOMContentLoaded', () => {
+  bindEyes();
+  setNowDt();
+
+  const sess = localStorage.getItem(K.SESSION);
+  if (sess) {
+    S.user = sess;
+    loadLS();
+    showPage('page-dashboard');
+    renderDash();
+  } else {
+    showPage('page-auth');
+    // If no users registered yet, auto-show register tab
+    if (getUsers().length === 0) switchTab('register');
+  }
+});
+
+/* ══════════════════════════════════
+   LS helpers
+══════════════════════════════════ */
+const getUsers   = () => JSON.parse(localStorage.getItem(K.USERS)   || '[]');
+const setUsers   = u  => localStorage.setItem(K.USERS,   JSON.stringify(u));
+const getFriends = () => JSON.parse(localStorage.getItem(K.FRIENDS) || '[]');
+const setFriends = f  => localStorage.setItem(K.FRIENDS, JSON.stringify(f));
+const getTxns    = () => JSON.parse(localStorage.getItem(K.TXNS)    || '{}');
+const setTxns    = t  => localStorage.setItem(K.TXNS,    JSON.stringify(t));
+
+function loadLS() {
+  S.friends = getFriends();
+  S.txns    = getTxns();
+}
+
+function saveAllData() {
+  setFriends(S.friends);
+  setTxns(S.txns);
+  toast('All data saved successfully!');
+}
+
+/* ══════════════════════════════════
+   PAGE ROUTING
+══════════════════════════════════ */
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById(id);
+  if (pg) { pg.classList.add('active'); window.scrollTo(0,0); }
+}
+
+/* ══════════════════════════════════
+   AUTH TABS
+══════════════════════════════════ */
+function switchTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('tab-login').classList.toggle('active', isLogin);
+  document.getElementById('tab-register').classList.toggle('active', !isLogin);
+  document.getElementById('form-login').classList.toggle('hidden', !isLogin);
+  document.getElementById('form-register').classList.toggle('hidden', isLogin);
+  hideMsg('msg-login'); hideMsg('msg-register');
+}
+
+/* ══════════════════════════════════
+   REGISTER
+══════════════════════════════════ */
+function doRegister() {
+  const name  = g('r-name').value.trim();
+  const email = g('r-email').value.trim().toLowerCase();
+  const pw    = g('r-pw').value;
+  const cpw   = g('r-cpw').value;
+
+  if (!name)              return showMsg('msg-register','err','Please enter your name.');
+  if (!validEmail(email)) return showMsg('msg-register','err','Enter a valid email address.');
+  if (pw.length < 4)      return showMsg('msg-register','err','Password must be at least 4 characters.');
+  if (pw !== cpw)         return showMsg('msg-register','err','Passwords do not match.');
+
+  const users = getUsers();
+  if (users.find(u => u.email === email))
+    return showMsg('msg-register','err','An account with this email already exists. Please sign in.');
+
+  const newUser = { email, password: pw, name };
+  users.push(newUser);
+  setUsers(users);
+
+  showMsg('msg-register','ok',`✓ Account created! Welcome, ${name}. Signing you in…`);
+  setTimeout(() => {
+    hideMsg('msg-register');
+    loginUser(email);
+  }, 1500);
+}
+
+/* ══════════════════════════════════
+   LOGIN
+══════════════════════════════════ */
+function doLogin() {
+  const email = g('l-email').value.trim().toLowerCase();
+  const pw    = g('l-pw').value;
+
+  if (!email || !pw) return showMsg('msg-login','err','Please enter your email and password.');
+
+  const users = getUsers();
+  const user  = users.find(u => u.email === email && u.password === pw);
+
+  if (!user) {
+    const exists = users.find(u => u.email === email);
+    if (!exists)
+      return showMsg('msg-login','err','No account found with this email. Please create one first.');
+    return showMsg('msg-login','err','Incorrect password. Try again or reset it below.');
+  }
+
+  hideMsg('msg-login');
+  loginUser(email);
+}
+
+function loginUser(email) {
+  S.user = email;
+  localStorage.setItem(K.SESSION, email);
+  loadLS();
+  g('l-email').value = '';
+  g('l-pw').value    = '';
+  showPage('page-dashboard');
+  renderDash();
+}
+
+/* ══════════════════════════════════
+   LOGOUT
+══════════════════════════════════ */
+function doLogout() {
+  saveAllData();
+  localStorage.removeItem(K.SESSION);
+  S = { user:null, friends:[], txns:{}, activeFriend:null, txnMode:'receive' };
+  showPage('page-auth');
+  // show login tab
+  switchTab('login');
+}
+
+/* ══════════════════════════════════
+   RESET PASSWORD
+══════════════════════════════════ */
+function doReset() {
+  const email = g('rs-email').value.trim().toLowerCase();
+  const pw    = g('rs-pw').value;
+  const cpw   = g('rs-cpw').value;
+
+  if (!email)             return showMsg('msg-reset','err','Enter your registered email.');
+  if (pw.length < 4)      return showMsg('msg-reset','err','Password must be at least 4 characters.');
+  if (pw !== cpw)         return showMsg('msg-reset','err','Passwords do not match.');
+
+  const users = getUsers();
+  const idx   = users.findIndex(u => u.email === email);
+  if (idx === -1) return showMsg('msg-reset','err','No account found with this email.');
+
+  users[idx].password = pw;
+  setUsers(users);
+  showMsg('msg-reset','ok','✓ Password updated! Redirecting to login…');
+
+  setTimeout(() => {
+    hideMsg('msg-reset');
+    g('rs-email').value = g('rs-pw').value = g('rs-cpw').value = '';
+    showPage('page-auth');
+    switchTab('login');
+  }, 2000);
+}
+
+/* ══════════════════════════════════
+   DASHBOARD
+══════════════════════════════════ */
+function renderDash() {
+  renderFriends();
+  updateTotalBal();
+}
+
+function renderFriends() {
+  const list  = g('friends-list');
+  const empty = g('empty-friends');
+  list.querySelectorAll('.fc').forEach(c => c.remove());
+  g('f-count').textContent = S.friends.length;
+
+  if (!S.friends.length) { empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+
+  S.friends.forEach(f => {
+    const bal = friendBal(f.id);
+    const cls = bal > 0 ? 'pos' : bal < 0 ? 'neg' : 'zero';
+    const sgn = bal > 0 ? '+' : bal < 0 ? '-' : '';
+    const card = document.createElement('div');
+    card.className = 'fc';
+    card.onclick   = () => openFriend(f.id);
+    card.innerHTML = `
+      <div class="av">${avLetter(f.name)}</div>
+      <div class="fi">
+        <div class="fn">${esc(f.name)}</div>
+        <div class="fp">${esc(f.phone || 'No details')}</div>
+      </div>
+      <div class="fb2 ${cls}">${sgn}${fmt(Math.abs(bal))}</div>
+      <i class="fa-solid fa-chevron-right arr"></i>`;
+    list.appendChild(card);
+  });
+}
+
+function updateTotalBal() {
+  let total = 0;
+  S.friends.forEach(f => total += friendBal(f.id));
+  const el = g('total-bal');
+  el.textContent = 'PKR ' + fmt(total);
+  el.style.color = total < 0 ? 'var(--red)' : total > 0 ? 'var(--green)' : 'var(--txt)';
+  g('bal-sub').textContent = `Across ${S.friends.length} friend${S.friends.length !== 1 ? 's' : ''}`;
+}
+
+/* ══════════════════════════════════
+   FRIEND MANAGEMENT
+══════════════════════════════════ */
+function openAddFriend() {
+  g('af-name').value = g('af-phone').value = '';
+  hideMsg('msg-af');
+  const pw = g('af-pick-wrap');
+  pw.style.display = ('contacts' in navigator && 'ContactsManager' in window) ? 'block' : 'none';
+  openMod('mod-add');
+}
+
+async function pickContact() {
+  if (!('contacts' in navigator)) { alert('Contact Picker not supported on this device.'); return; }
+  try {
+    const c = await navigator.contacts.select(['name','tel'],{multiple:false});
+    if (c && c.length) {
+      g('af-name').value  = c[0].name?.[0]  || '';
+      g('af-phone').value = c[0].tel?.[0]   || '';
+    }
+  } catch(e){ console.warn(e); }
+}
+
+function addFriend() {
+  const name  = g('af-name').value.trim();
+  const phone = g('af-phone').value.trim();
+  if (!name) return showMsg('msg-af','err','Friend name is required.');
+  if (S.friends.find(f => f.name.toLowerCase() === name.toLowerCase()))
+    return showMsg('msg-af','err','A friend with this name already exists.');
+
+  const f = { id: uid(), name, phone };
+  S.friends.push(f);
+  if (!S.txns[f.id]) S.txns[f.id] = [];
+  setFriends(S.friends); setTxns(S.txns);
+  closeMod('mod-add');
+  renderDash();
+  toast(`${name} added!`);
+}
+
+function openDeleteFriend() {
+  const list = g('del-list');
+  hideMsg('msg-del');
+  list.innerHTML = '';
+  if (!S.friends.length) {
+    list.innerHTML = '<p style="color:var(--muted);font-size:.86rem;">No friends to delete.</p>';
+  } else {
+    S.friends.forEach(f => {
+      const d = document.createElement('div');
+      d.className = 'del-item';
+      d.innerHTML = `<div class="av" style="width:36px;height:36px;font-size:1rem">${avLetter(f.name)}</div>
+        <div class="fn">${esc(f.name)}</div>
+        <button class="btn-del" onclick="deleteFriend('${f.id}')"><i class="fa-solid fa-trash"></i> Delete</button>`;
+      list.appendChild(d);
+    });
+  }
+  openMod('mod-del');
+}
+
+function deleteFriend(id) {
+  const f = S.friends.find(x => x.id === id);
+  if (!f) return;
+  if (!confirm(`Delete "${f.name}" and ALL their transactions?`)) return;
+  S.friends = S.friends.filter(x => x.id !== id);
+  delete S.txns[id];
+  setFriends(S.friends); setTxns(S.txns);
+  closeMod('mod-del');
+  renderDash();
+  toast(`${f.name} removed.`);
+}
+
+/* ══════════════════════════════════
+   FRIEND DETAIL
+══════════════════════════════════ */
+function openFriend(id) {
+  const f = S.friends.find(x => x.id === id);
+  if (!f) return;
+  S.activeFriend = id;
+  g('fr-name').textContent  = f.name;
+  g('fr-phone').textContent = f.phone || '—';
+  g('fr-av').textContent    = avLetter(f.name);
+  renderDetail();
+  showPage('page-friend');
+}
+
+function renderDetail() {
+  const id  = S.activeFriend;
+  const bal = friendBal(id);
+  const txns = (S.txns[id] || []).slice().reverse();
+
+  // pill
+  const pa = g('pill-amt'), pb = g('pill-bdg'), pill = g('bal-pill');
+  pa.textContent = 'PKR ' + fmt(Math.abs(bal));
+  if (bal > 0) {
+    pa.className='pill-amt pos'; pb.textContent='TO RECEIVE'; pb.className='pill-bdg pos';
+    pill.style.borderColor='rgba(34,197,94,.3)';
+  } else if (bal < 0) {
+    pa.className='pill-amt neg'; pb.textContent='TO GIVE'; pb.className='pill-bdg neg';
+    pill.style.borderColor='rgba(239,68,68,.3)';
+  } else {
+    pa.className='pill-amt zero'; pb.textContent='SETTLED'; pb.className='pill-bdg zero';
+    pill.style.borderColor='var(--navy-b)';
+  }
+
+  // list
+  const list = g('txn-list'), empty = g('empty-txns');
+  list.querySelectorAll('.ti').forEach(e => e.remove());
+  if (!txns.length) { empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+
+  txns.forEach(t => {
+    const isR = t.type === 'receive';
+    const el  = document.createElement('div');
+    el.className = 'ti';
+    el.innerHTML = `
+      <div class="ti-ico ${t.type}"><i class="fa-solid fa-arrow-${isR?'down-to-bracket':'up-from-bracket'}"></i></div>
+      <div class="ti-meta">
+        <div class="ti-note">${esc(t.note || (isR ? 'Received' : 'Given'))}</div>
+        <div class="ti-date">${fmtDt(t.dt)}</div>
+      </div>
+      <div class="ti-amt ${t.type}">${isR?'+':'-'} PKR ${fmt(t.amount)}</div>`;
+    list.appendChild(el);
+  });
+}
+
+function goBack() { showPage('page-dashboard'); renderDash(); }
+
+/* ══════════════════════════════════
+   TRANSACTIONS
+══════════════════════════════════ */
+function openTxnModal(mode) {
+  S.txnMode = mode;
+  const isR = mode === 'receive';
+  const hdr = g('txn-m-hdr'), ttl = g('txn-m-title'), sub = g('txn-sub-btn');
+  hdr.className = 'm-hdr ' + (isR ? 'receive-h' : 'give-h');
+  ttl.innerHTML = `<i class="fa-solid fa-arrow-${isR?'down-to-bracket':'up-from-bracket'}"></i> ${isR?'You Receive':'You Give'}`;
+  sub.style.background = isR ? 'linear-gradient(135deg,#16A34A,#22C55E)' : 'linear-gradient(135deg,#DC2626,#EF4444)';
+  g('txn-amt').value = g('txn-note').value = '';
+  setNowDt();
+  hideMsg('msg-txn');
+  openMod('mod-txn');
+}
+
+function submitTxn() {
+  const raw = g('txn-amt').value.trim();
+  const note= g('txn-note').value.trim();
+  const dt  = g('txn-dt').value;
+  const id  = S.activeFriend;
+
+  if (!raw || isNaN(+raw) || +raw <= 0) return showMsg('msg-txn','err','Enter a valid positive amount.');
+
+  const t = { id:uid(), type:S.txnMode, amount:parseFloat((+raw).toFixed(2)), note, dt: dt||new Date().toISOString() };
+  if (!S.txns[id]) S.txns[id] = [];
+  S.txns[id].push(t);
+  setTxns(S.txns);
+  closeMod('mod-txn');
+  renderDetail();
+  toast(`${S.txnMode==='receive'?'Received':'Given'}: PKR ${fmt(t.amount)}`);
+}
+
+/* ══════════════════════════════════
+   BALANCE
+══════════════════════════════════ */
+function friendBal(id) {
+  return (S.txns[id]||[]).reduce((s,t) => s + (t.type==='receive' ? t.amount : -t.amount), 0);
+}
+
+/* ══════════════════════════════════
+   MODAL HELPERS
+══════════════════════════════════ */
+function openMod(id)  { g(id).classList.remove('hidden'); document.body.style.overflow='hidden'; }
+function closeMod(id) { g(id).classList.add('hidden');    document.body.style.overflow=''; }
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-ov')) { e.target.classList.add('hidden'); document.body.style.overflow=''; }
+});
+
+/* ══════════════════════════════════
+   TOAST
+══════════════════════════════════ */
+let _tt;
+function toast(msg) {
+  const el = g('toast');
+  el.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${esc(msg)}`;
+  el.classList.remove('hidden');
+  clearTimeout(_tt);
+  _tt = setTimeout(() => el.classList.add('hidden'), 2800);
+}
+
+/* ══════════════════════════════════
+   MESSAGE HELPERS
+══════════════════════════════════ */
+function showMsg(id, type, msg) {
+  const el = g(id);
+  el.textContent = msg;
+  el.className   = 'msg ' + type;
+  el.classList.remove('hidden');
+}
+function hideMsg(id) { const el = g(id); if(el) el.classList.add('hidden'); }
+
+/* ══════════════════════════════════
+   PASSWORD EYE
+══════════════════════════════════ */
+function bindEyes() {
+  [['eye-login','l-pw'],['eye-reg','r-pw']].forEach(([eyeId, inputId]) => {
+    const eye = g(eyeId);
+    if(!eye) return;
+    eye.addEventListener('click', () => {
+      const inp = g(inputId);
+      const txt = inp.type === 'text';
+      inp.type = txt ? 'password' : 'text';
+      eye.className = `eye fa-regular ${txt ? 'fa-eye' : 'fa-eye-slash'}`;
+    });
+  });
+}
+
+/* ══════════════════════════════════
+   UTILITIES
+══════════════════════════════════ */
+const g   = id => document.getElementById(id);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const avLetter = n => (n||'?').charAt(0).toUpperCase();
+const validEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function fmt(n) {
+  return (parseFloat(n)||0).toLocaleString('en-PK',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtDt(dt) {
+  if(!dt) return '—';
+  try { return new Date(dt).toLocaleString('en-PK',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+  catch{ return dt; }
+}
+function setNowDt() {
+  const n = new Date(), p = x => String(x).padStart(2,'0');
+  const s = `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}T${p(n.getHours())}:${p(n.getMinutes())}`;
+  const el = g('txn-dt'); if(el) el.value = s;
+}
+
+/* ══════════════════════════════════
+   KEYBOARD SHORTCUTS
+══════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const pg = document.querySelector('.page.active');
+    if (!pg) return;
+    if (pg.id === 'page-auth') {
+      const regVisible = !g('form-register').classList.contains('hidden');
+      regVisible ? doRegister() : doLogin();
+    }
+    if (pg.id === 'page-reset') doReset();
+  }
+  if (e.key === 'Escape') ['mod-add','mod-del','mod-txn'].forEach(closeMod);
+});
+</script>
+</body>
+</html>
